@@ -19,7 +19,6 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ offers, orders, onRefre
   
   const users = dataService.getUsers();
   const deposits = dataService.getDeposits();
-  const totalBalance = users.reduce((sum, u) => sum + u.balance, 0);
   const pendingOrders = orders.filter(o => o.status === 'Pending').length;
 
   const handleAiUpload = async () => {
@@ -78,6 +77,12 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ offers, orders, onRefre
     }
   };
 
+  const handleToggleRole = (userId: string) => {
+    dataService.toggleUserRole(userId);
+    onRefresh();
+    alert('ইউজার রোল পরিবর্তন করা হয়েছে!');
+  };
+
   return (
     <div className="space-y-6 pb-24 animate-in fade-in duration-500">
       <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide px-1">
@@ -116,11 +121,6 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ offers, orders, onRefre
       {activeTab === 'ai-upload' && (
         <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-xl shadow-black/5 space-y-6 px-1 mx-1 animate-in slide-in-from-bottom">
            <h3 className="text-sm font-black text-gray-800 uppercase tracking-widest">AI অফার আপলোড</h3>
-           <div className="bg-indigo-50 p-4 rounded-xl border border-indigo-100">
-              <p className="text-[11px] font-bold text-indigo-700 leading-relaxed Hind-Siliguri">
-                <b>কিভাবে কাজ করবে:</b> আপনার অফার টেক্সটটি (যেমন: GP 10GB 30Days 299Tk) নিচের বক্সে পেস্ট করুন। AI এটি থেকে সঠিক অপারেটর, মেয়াদ ও দাম নিজে থেকেই বুঝে ডাটাবেসে সেভ করে দিবে।
-              </p>
-           </div>
            <textarea 
              className="w-full bg-gray-50 p-6 rounded-[2rem] text-sm font-medium border border-gray-100 min-h-[200px] outline-none shadow-inner"
              placeholder="আপনার অফার লিস্ট এখানে পেস্ট করুন..."
@@ -142,31 +142,20 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ offers, orders, onRefre
            <h3 className="text-sm font-black text-gray-800 uppercase tracking-widest text-blue-600">মেইন অ্যাপ সেটিংস</h3>
            <div className="space-y-6">
               <div className="space-y-2">
-                 <label className="text-[10px] font-black text-gray-400 uppercase ml-2">App Logo URL</label>
-                 <input type="text" className="w-full bg-gray-50 p-5 rounded-2xl text-xs font-mono border border-gray-100 outline-none focus:border-blue-400" value={config.logoUrl} onChange={e => setConfig({...config, logoUrl: e.target.value})} placeholder="https://example.com/logo.png" />
-                 <p className="text-[9px] text-gray-400 px-1">এখানে আপনার লোগোর সরাসরি লিংক দিন।</p>
+                 <label className="text-[10px] font-black text-gray-400 uppercase ml-2">Master Admin Email</label>
+                 <input type="email" className="w-full bg-gray-50 p-5 rounded-2xl text-xs font-mono border border-gray-100 outline-none focus:border-blue-400" value={config.masterAdminEmail} onChange={e => setConfig({...config, masterAdminEmail: e.target.value})} placeholder="admin@gmail.com" />
+                 <p className="text-[9px] text-gray-400 px-1">এই ইমেইল দিয়ে যে কেউ লগইন করলে অটোমেটিক এডমিন হয়ে যাবে। ফায়ারবেস থেকে এই ইমেইল দিয়ে একাউন্ট খুলুন।</p>
               </div>
               <div className="space-y-2">
-                 <label className="text-[10px] font-black text-gray-400 uppercase ml-2">Download Link</label>
-                 <input type="text" className="w-full bg-gray-50 p-5 rounded-2xl text-xs font-mono border border-gray-100 outline-none focus:border-blue-400" value={config.downloadUrl} onChange={e => setConfig({...config, downloadUrl: e.target.value})} placeholder="https://drive.google.com/..." />
-                 <p className="text-[9px] text-gray-400 px-1">অ্যাপ আপডেট করার জন্য ড্রাইভ বা ডিরেক্ট ডাউনলোড লিংক দিন।</p>
+                 <label className="text-[10px] font-black text-gray-400 uppercase ml-2">App Logo URL</label>
+                 <input type="text" className="w-full bg-gray-50 p-5 rounded-2xl text-xs font-mono border border-gray-100 outline-none focus:border-blue-400" value={config.logoUrl} onChange={e => setConfig({...config, logoUrl: e.target.value})} />
               </div>
-              
-              <div className="relative py-4">
-                 <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-100"></div></div>
-                 <div className="relative flex justify-center text-[10px] uppercase font-black text-gray-300 bg-white px-2">বট সেটিংস</div>
-              </div>
-
               <div className="space-y-2">
                  <label className="text-[10px] font-black text-gray-400 uppercase ml-2">Bot Token</label>
                  <input type="password" className="w-full bg-gray-50 p-5 rounded-2xl text-xs font-mono border border-gray-100 outline-none focus:border-blue-400" value={config.botToken} onChange={e => setConfig({...config, botToken: e.target.value})} />
               </div>
-              <div className="space-y-2">
-                 <label className="text-[10px] font-black text-gray-400 uppercase ml-2">Admin Chat ID</label>
-                 <input type="text" className="w-full bg-gray-50 p-5 rounded-2xl text-xs font-mono border border-gray-100 outline-none focus:border-blue-400" value={config.adminChatId} onChange={e => setConfig({...config, adminChatId: e.target.value})} />
-              </div>
            </div>
-           <button onClick={() => { dataService.saveConfig(config); alert('সফলভাবে সেভ হয়েছে!'); }} className="w-full py-5 bg-gray-900 text-white rounded-[2rem] text-xs font-black uppercase tracking-[0.2em] active:scale-95 transition-all shadow-xl">সব আপডেট সেভ করুন</button>
+           <button onClick={() => { dataService.saveConfig(config); alert('সফলভাবে সেভ হয়েছে!'); onRefresh(); }} className="w-full py-5 bg-gray-900 text-white rounded-[2rem] text-xs font-black uppercase tracking-[0.2em] active:scale-95 transition-all shadow-xl">সব আপডেট সেভ করুন</button>
         </div>
       )}
 
@@ -174,20 +163,32 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ offers, orders, onRefre
         <div className="space-y-4 px-1">
            <h3 className="text-sm font-black text-gray-800 uppercase tracking-widest ml-1">মেম্বার লিস্ট ({users.length})</h3>
            {users.map(u => (
-             <div key={u.id} className="bg-white p-5 rounded-[2rem] border border-gray-100 shadow-sm flex justify-between items-center">
-                <div className="flex items-center gap-4">
-                   <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center font-bold text-gray-400">
-                      {u.avatarUrl ? <img src={u.avatarUrl} className="w-full h-full rounded-full object-cover" /> : '👤'}
-                   </div>
-                   <div>
-                      <p className="text-sm font-bold text-gray-800">{u.name}</p>
-                      <p className="text-[10px] text-gray-400 font-bold uppercase">{u.phone || u.email || 'No Contact'}</p>
-                   </div>
+             <div key={u.id} className="bg-white p-5 rounded-[2rem] border border-gray-100 shadow-sm flex flex-col gap-4">
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center font-bold text-gray-400">
+                        {u.avatarUrl ? <img src={u.avatarUrl} className="w-full h-full rounded-full object-cover" /> : '👤'}
+                    </div>
+                    <div>
+                        <p className="text-sm font-bold text-gray-800">{u.name}</p>
+                        <p className="text-[10px] text-gray-400 font-bold uppercase">{u.email || u.phone}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-black text-green-600">৳{u.balance}</p>
+                    <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded-full ${u.role === 'admin' ? 'bg-blue-50 text-blue-600' : 'bg-gray-50 text-gray-400'}`}>
+                      {u.role}
+                    </span>
+                  </div>
                 </div>
-                <div className="text-right">
-                   <p className="text-sm font-black text-green-600">৳{u.balance}</p>
-                   <p className="text-[8px] font-black text-gray-300 uppercase mt-0.5">Role: {u.role}</p>
-                </div>
+                {u.email !== config.masterAdminEmail && (
+                  <button 
+                    onClick={() => handleToggleRole(u.id)}
+                    className={`w-full py-3 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-all ${u.role === 'admin' ? 'bg-red-50 text-red-600 border-red-100' : 'bg-blue-50 text-blue-600 border-blue-100'}`}
+                  >
+                    {u.role === 'admin' ? 'মেম্বার বানান' : 'এডমিন বানান'}
+                  </button>
+                )}
              </div>
            ))}
         </div>
@@ -199,7 +200,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ offers, orders, onRefre
              <div key={order.id} className="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-xl space-y-5">
                 <div className="flex justify-between items-start">
                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center p-2"><img src={OPERATORS.find(o => o.name === order.operator)?.logo} className="w-full h-full object-contain" /></div>
+                      <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center p-2 font-black text-[10px] text-gray-400 border border-gray-100">{order.operator}</div>
                       <div>
                          <p className="text-sm font-bold text-gray-800 Hind-Siliguri">{order.offerTitle}</p>
                          <p className="text-[10px] text-gray-400 font-black uppercase mt-1.5">{order.userName} • {order.phoneNumber}</p>
