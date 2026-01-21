@@ -39,7 +39,7 @@ const App: React.FC = () => {
       tg.expand();
       tg.ready();
       const tgUser = tg.initDataUnsafe?.user;
-      const startParam = tg.initDataUnsafe?.start_param; // Telegram Referral parameter
+      const startParam = tg.initDataUnsafe?.start_param;
 
       if (tgUser) {
         const users = dataService.getUsers();
@@ -54,7 +54,7 @@ const App: React.FC = () => {
             telegramId: String(tgUser.id),
             avatarUrl: tgUser.photo_url || undefined,
             referralCode: Math.random().toString(36).substring(2, 8).toUpperCase(),
-            referredBy: startParam || undefined // Handle referral via link
+            referredBy: startParam || undefined
           };
           dataService.updateUser(dbUser);
         }
@@ -82,7 +82,7 @@ const App: React.FC = () => {
           balance: 0, 
           role: 'user',
           referralCode: Math.random().toString(36).substring(2, 8).toUpperCase(),
-          referredBy: authData.referralCode || undefined // Manual Referral
+          referredBy: authData.referralCode || undefined
         };
         dataService.updateUser(newUser);
         localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(newUser));
@@ -363,10 +363,22 @@ const App: React.FC = () => {
                    <h3 className="text-base font-bold text-gray-800 Hind-Siliguri">{selectedCategory} অফার</h3>
                 </div>
 
+                {/* Operator Filter - No images as requested */}
                 <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-                  <button onClick={() => setSelectedOperator('All')} className={`shrink-0 px-4 py-1.5 rounded-full text-[11px] font-bold ${selectedOperator === 'All' ? 'bg-green-600 text-white shadow-md shadow-green-600/20' : 'bg-gray-100 text-gray-400'}`}>সব</button>
+                  <button 
+                    onClick={() => setSelectedOperator('All')} 
+                    className={`shrink-0 px-5 py-2 rounded-full text-[11px] font-black uppercase tracking-widest transition-all ${selectedOperator === 'All' ? 'bg-green-600 text-white shadow-md shadow-green-600/20' : 'bg-white text-gray-400 border border-gray-100'}`}
+                  >
+                    সব
+                  </button>
                   {OPERATORS.map(op => (
-                    <button key={op.name} onClick={() => setSelectedOperator(op.name)} className={`shrink-0 flex items-center gap-2 px-3 py-1.5 rounded-full text-[11px] font-bold ${selectedOperator === op.name ? 'border-2 border-green-600 bg-white shadow-sm' : 'bg-gray-100 text-gray-400'}`}><img src={op.logo} className="w-4 h-4 object-contain" />{op.name}</button>
+                    <button 
+                      key={op.name} 
+                      onClick={() => setSelectedOperator(op.name)} 
+                      className={`shrink-0 px-5 py-2 rounded-full text-[11px] font-black uppercase tracking-widest transition-all ${selectedOperator === op.name ? 'bg-green-600 text-white shadow-md shadow-green-600/20' : 'bg-white text-gray-400 border border-gray-100'}`}
+                    >
+                      {op.name}
+                    </button>
                   ))}
                 </div>
 
@@ -374,7 +386,9 @@ const App: React.FC = () => {
                   {filteredOffers.length > 0 ? filteredOffers.map(offer => (
                      <div key={offer.id} className="bg-white p-4 rounded-2xl border border-gray-100 flex justify-between items-center shadow-xl shadow-black/5">
                         <div className="flex items-center gap-4">
-                           <div className="w-12 h-12 bg-gray-50 rounded-xl p-2"><img src={OPERATORS.find(o => o.name === offer.operator)?.logo} className="w-full h-full object-contain" /></div>
+                           <div className="w-12 h-12 bg-gray-50 rounded-xl p-2 flex items-center justify-center font-black text-[10px] text-gray-400 border border-gray-100">
+                             {offer.operator}
+                           </div>
                            <div><p className="font-bold text-sm text-gray-800 Hind-Siliguri">{offer.title}</p><p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{offer.duration}</p></div>
                         </div>
                         <div className="text-right pl-2"><p className="text-lg font-black text-green-600">৳{offer.price}</p><button onClick={() => setPurchasingOffer(offer)} className="mt-1.5 px-5 py-2 bg-green-600 text-white rounded-full text-[10px] font-bold uppercase tracking-widest shadow-lg active:scale-95 transition-all">কিনুন</button></div>
