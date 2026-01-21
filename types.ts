@@ -66,6 +66,7 @@ export interface AppConfig {
   telegramUrl: string;
   botToken: string;
   adminChatId: string;
+  masterAdminEmail: string; // New field for primary admin
   isUpdateMandatory: boolean;
   notice: string;
   logoUrl: string;
