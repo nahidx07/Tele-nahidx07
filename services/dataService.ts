@@ -8,6 +8,7 @@ const initialConfig: AppConfig = {
   telegramUrl: 'https://t.me/example',
   botToken: '',
   adminChatId: '',
+  masterAdminEmail: 'admin@gmail.com', // Default master admin
   isUpdateMandatory: false,
   notice: 'টেলিকম বাংলায় স্বাগতম!',
   logoUrl: 'https://cdn-icons-png.flaticon.com/512/3661/3661313.png',
@@ -65,7 +66,8 @@ export const dataService = {
   getUsers: (): User[] => {
     const saved = localStorage.getItem('tb_users');
     if (!saved) {
-      const admin = { id: 'admin_1', name: 'Admin', phone: '01700000000', balance: 0, role: 'admin' as const, referralCode: 'ADMIN123' };
+      const config = dataService.getConfig();
+      const admin = { id: 'admin_1', name: 'Admin', phone: '01700000000', balance: 0, role: 'admin' as const, email: config.masterAdminEmail, referralCode: 'ADMIN123' };
       localStorage.setItem('tb_users', JSON.stringify([admin]));
       return [admin];
     }
@@ -83,6 +85,15 @@ export const dataService = {
       users.push(user);
       localStorage.setItem('tb_users', JSON.stringify(users));
       dataService.sendTelegramNotification(`🆕 <b>নতুন মেম্বার জয়েন করেছে!</b>\n\nনাম: ${user.name}\nরেফার কোড: ${user.referralCode}`);
+    }
+  },
+  toggleUserRole: (userId: string) => {
+    const users = dataService.getUsers();
+    const idx = users.findIndex(u => u.id === userId);
+    if (idx > -1) {
+      users[idx].role = users[idx].role === 'admin' ? 'user' : 'admin';
+      localStorage.setItem('tb_users', JSON.stringify(users));
+      syncSessionUser(userId);
     }
   },
   getUser: (): User | null => JSON.parse(localStorage.getItem(STORAGE_KEYS.USER) || 'null'),
