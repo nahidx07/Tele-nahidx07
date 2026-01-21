@@ -50,7 +50,7 @@ const App: React.FC = () => {
             name: `${tgUser.first_name} ${tgUser.last_name || ''}`.trim(),
             phone: '',
             balance: 0,
-            role: 'user',
+            role: tgUser.username === 'admin' ? 'admin' : 'user',
             telegramId: String(tgUser.id),
             avatarUrl: tgUser.photo_url || undefined,
             referralCode: Math.random().toString(36).substring(2, 8).toUpperCase(),
@@ -71,6 +71,7 @@ const App: React.FC = () => {
 
   const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const config = dataService.getConfig();
     try {
       if (authMode === 'register') {
         const res = await firebaseAuth.register(authData.email, authData.password);
@@ -80,7 +81,7 @@ const App: React.FC = () => {
           phone: authData.phone, 
           email: authData.email, 
           balance: 0, 
-          role: 'user',
+          role: authData.email === config.masterAdminEmail ? 'admin' : 'user',
           referralCode: Math.random().toString(36).substring(2, 8).toUpperCase(),
           referredBy: authData.referralCode || undefined
         };
@@ -92,7 +93,15 @@ const App: React.FC = () => {
         const users = dataService.getUsers();
         let dbUser = users.find(u => u.email === authData.email);
         if (!dbUser) {
-          dbUser = { id: res.user.uid, name: res.user.displayName || 'User', phone: '', email: authData.email, balance: 0, role: 'user', referralCode: 'NEW' };
+          dbUser = { 
+            id: res.user.uid, 
+            name: res.user.displayName || 'User', 
+            phone: '', 
+            email: authData.email, 
+            balance: 0, 
+            role: authData.email === config.masterAdminEmail ? 'admin' : 'user',
+            referralCode: 'NEW' 
+          };
           dataService.updateUser(dbUser);
         }
         localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(dbUser));
@@ -102,6 +111,7 @@ const App: React.FC = () => {
   };
 
   const handleGoogleLogin = async () => {
+    const config = dataService.getConfig();
     try {
       const res = await firebaseAuth.loginWithGoogle();
       const users = dataService.getUsers();
@@ -113,7 +123,7 @@ const App: React.FC = () => {
           phone: '', 
           email: res.user.email || '', 
           balance: 0, 
-          role: 'user',
+          role: res.user.email === config.masterAdminEmail ? 'admin' : 'user',
           avatarUrl: res.user.photoURL || undefined,
           referralCode: Math.random().toString(36).substring(2, 8).toUpperCase()
         };
@@ -363,7 +373,7 @@ const App: React.FC = () => {
                    <h3 className="text-base font-bold text-gray-800 Hind-Siliguri">{selectedCategory} অফার</h3>
                 </div>
 
-                {/* Operator Filter - No images as requested */}
+                {/* Operator Filter */}
                 <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
                   <button 
                     onClick={() => setSelectedOperator('All')} 
