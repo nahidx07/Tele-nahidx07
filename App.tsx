@@ -29,7 +29,8 @@ const App: React.FC = () => {
   const [authData, setAuthData] = useState({ name: '', phone: '', email: '', password: '', referralCode: '' });
 
   const refreshData = () => {
-    setUser(dataService.getUser());
+    const u = dataService.getUser();
+    setUser(u);
   };
 
   useEffect(() => {
@@ -38,7 +39,7 @@ const App: React.FC = () => {
       tg.expand();
       tg.ready();
       const tgUser = tg.initDataUnsafe?.user;
-      const startParam = tg.initDataUnsafe?.start_param; // Telegram Referral Parameter
+      const startParam = tg.initDataUnsafe?.start_param; // Telegram Referral parameter
 
       if (tgUser) {
         const users = dataService.getUsers();
@@ -53,7 +54,7 @@ const App: React.FC = () => {
             telegramId: String(tgUser.id),
             avatarUrl: tgUser.photo_url || undefined,
             referralCode: Math.random().toString(36).substring(2, 8).toUpperCase(),
-            referredBy: startParam || undefined // Auto referral from telegram link
+            referredBy: startParam || undefined // Handle referral via link
           };
           dataService.updateUser(dbUser);
         }
@@ -81,7 +82,7 @@ const App: React.FC = () => {
           balance: 0, 
           role: 'user',
           referralCode: Math.random().toString(36).substring(2, 8).toUpperCase(),
-          referredBy: authData.referralCode || undefined // Manual Referral Code
+          referredBy: authData.referralCode || undefined // Manual Referral
         };
         dataService.updateUser(newUser);
         localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(newUser));
@@ -134,8 +135,8 @@ const App: React.FC = () => {
   if (showSplash) {
     return (
       <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6">
-        <img src={appConfig.logoUrl} className="w-24 h-24 object-contain animate-bounce rounded-xl" />
-        <h2 className="mt-6 text-xl font-bold text-gray-800 tracking-tight">Telecom Bangla</h2>
+        <img src={appConfig.logoUrl} className="w-24 h-24 object-contain animate-bounce rounded-2xl" />
+        <h2 className="mt-6 text-xl font-black text-gray-800 tracking-tight">Telecom Bangla</h2>
       </div>
     );
   }
@@ -145,11 +146,11 @@ const App: React.FC = () => {
       <div className="min-h-screen flex items-center justify-center bg-gray-50 px-6">
         <div className="w-full max-w-sm space-y-6 animate-in fade-in">
            <div className="text-center space-y-2">
-              <img src={appConfig.logoUrl} className="w-16 h-16 mx-auto mb-4 rounded-xl shadow-lg" />
+              <img src={appConfig.logoUrl} className="w-16 h-16 mx-auto mb-4 rounded-2xl shadow-xl" />
               <h1 className="text-3xl font-black text-green-600">Telecom Bangla</h1>
               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{authMode === 'login' ? 'স্বাগতম!' : 'নতুন একাউন্ট খুলুন'}</p>
            </div>
-           <div className="bg-white p-8 rounded-[2.5rem] shadow-2xl shadow-black/5 border border-gray-100 space-y-4">
+           <div className="bg-white p-8 rounded-[3rem] shadow-2xl shadow-black/5 border border-gray-100 space-y-4">
               <form onSubmit={handleAuthSubmit} className="space-y-4">
                   {authMode === 'register' && (
                     <>
@@ -160,7 +161,7 @@ const App: React.FC = () => {
                   )}
                   <input placeholder="ইমেইল" type="email" className="w-full bg-gray-50 p-4 rounded-xl text-sm font-bold border border-gray-100 outline-none focus:border-green-500" value={authData.email} onChange={e => setAuthData({...authData, email: e.target.value})} required />
                   <input placeholder="পাসওয়ার্ড" type="password" className="w-full bg-gray-50 p-4 rounded-xl text-sm font-bold border border-gray-100 outline-none focus:border-green-500" value={authData.password} onChange={e => setAuthData({...authData, password: e.target.value})} required />
-                  <button type="submit" className="w-full py-4 bg-green-600 text-white rounded-xl font-bold uppercase text-xs tracking-widest shadow-lg active:scale-95 transition-all">
+                  <button type="submit" className="w-full py-4 bg-green-600 text-white rounded-xl font-black uppercase text-xs tracking-widest shadow-lg active:scale-95 transition-all">
                     {authMode === 'login' ? 'লগইন' : 'রেজিস্ট্রেশন'}
                   </button>
               </form>
@@ -203,7 +204,7 @@ const App: React.FC = () => {
         <div className="space-y-6">
           {subView === 'home' && (
             <div className="animate-in fade-in space-y-6 pb-6">
-              <div className="bg-white rounded-2xl p-6 flex items-center justify-between shadow-xl shadow-black/5 border border-gray-100">
+              <div className="bg-white rounded-[2rem] p-6 flex items-center justify-between shadow-xl shadow-black/5 border border-gray-100">
                 <div className="flex items-center gap-4">
                    <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center text-white font-bold shadow-lg shadow-green-600/20">৳</div>
                    <div>
@@ -247,6 +248,7 @@ const App: React.FC = () => {
                  ))}
               </div>
 
+              {/* Telegram Join Banner */}
               <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-[2.5rem] p-6 border border-blue-100 shadow-xl shadow-blue-600/5 flex flex-col items-center text-center space-y-4">
                  <div className="w-16 h-16 bg-white rounded-3xl flex items-center justify-center shadow-lg">
                     <svg className="w-10 h-10 text-blue-500" viewBox="0 0 24 24" fill="currentColor">
