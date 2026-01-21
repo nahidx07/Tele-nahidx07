@@ -1,7 +1,0 @@
-{
-  "name": "Telicom Bangla",
-  "description": "Bangladeshi premium telecom offer selling app with clean white UI.",
-  "requestFramePermissions": [
-    "camera"
-  ]
-}
